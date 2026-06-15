@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Interactive Computing Archive</title>
+    <style>
+      :root {
+        --ink: #171717;
+        --paper: #f7f3ec;
+        --muted: #6b6259;
+        --line: rgba(23, 23, 23, 0.16);
+        --green: #2f7d5a;
+        --blue: #3c6fbe;
+        --red: #d95c4a;
+        --yellow: #e9b949;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        color: var(--ink);
+        background: var(--paper);
+        font-family: Arial, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      .frame {
+        min-height: 100vh;
+        padding: 34px clamp(20px, 4vw, 72px);
+        border-bottom: 1px solid var(--line);
+      }
+
+      .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        font-size: 14px;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 800;
+        letter-spacing: 0;
+      }
+
+      .brand-mark {
+        width: 32px;
+        height: 32px;
+        border: 2px solid var(--ink);
+        background:
+          linear-gradient(90deg, transparent 46%, var(--ink) 46% 54%, transparent 54%),
+          linear-gradient(0deg, transparent 46%, var(--ink) 46% 54%, transparent 54%),
+          var(--yellow);
+      }
+
+      nav {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+      }
+
+      nav a,
+      .button {
+        min-height: 36px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid var(--line);
+        padding: 0 14px;
+        background: rgba(255, 255, 255, 0.38);
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      .hero {
+        display: grid;
+        grid-template-columns: minmax(0, 0.86fr) minmax(320px, 1.14fr);
+        gap: clamp(28px, 5vw, 72px);
+        align-items: center;
+        min-height: calc(100vh - 72px);
+        padding: 40px 0 16px;
+      }
+
+      .eyebrow {
+        margin: 0 0 20px;
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 800;
+      }
+
+      h1,
+      h2 {
+        margin: 0;
+        max-width: 980px;
+        font-size: clamp(48px, 8.4vw, 134px);
+        line-height: 0.92;
+        letter-spacing: 0;
+      }
+
+      .lead {
+        max-width: 660px;
+        margin: 28px 0 0;
+        color: #332f2b;
+        font-size: clamp(17px, 2vw, 24px);
+        line-height: 1.55;
+        word-break: keep-all;
+      }
+
+      .hero-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 32px;
+      }
+
+      .button.primary {
+        border-color: var(--ink);
+        color: #fff;
+        background: var(--ink);
+      }
+
+      .stage {
+        position: relative;
+        min-height: 520px;
+        overflow: hidden;
+        border: 2px solid var(--ink);
+        background:
+          linear-gradient(90deg, rgba(23, 23, 23, 0.08) 1px, transparent 1px),
+          linear-gradient(0deg, rgba(23, 23, 23, 0.08) 1px, transparent 1px),
+          #fffdf8;
+        background-size: 34px 34px;
+      }
+
+      .shape {
+        position: absolute;
+        border: 2px solid var(--ink);
+      }
+
+      .shape.one {
+        width: 54%;
+        aspect-ratio: 1;
+        left: -12%;
+        top: 12%;
+        border-radius: 50%;
+        background: var(--green);
+      }
+
+      .shape.two {
+        width: 34%;
+        aspect-ratio: 1;
+        right: 8%;
+        top: 8%;
+        background: var(--yellow);
+        transform: rotate(8deg);
+      }
+
+      .shape.three {
+        width: 64%;
+        height: 25%;
+        right: -9%;
+        bottom: 13%;
+        border-radius: 999px;
+        background: var(--blue);
+      }
+
+      .shape.four {
+        width: 24%;
+        aspect-ratio: 1;
+        left: 42%;
+        bottom: 30%;
+        border-radius: 50%;
+        background: var(--red);
+      }
+
+      .frame-label {
+        position: absolute;
+        left: 18px;
+        bottom: 18px;
+        padding: 8px 10px;
+        color: #fff;
+        background: var(--ink);
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .section-head {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(260px, 420px);
+        gap: 28px;
+        align-items: end;
+        padding: 38px 0 34px;
+      }
+
+      .section-head h2 {
+        font-size: clamp(42px, 6vw, 92px);
+      }
+
+      .section-head p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 17px;
+        line-height: 1.55;
+        word-break: keep-all;
+      }
+
+      .feature-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
+      }
+
+      .work-card {
+        min-height: 300px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        border: 2px solid var(--ink);
+        padding: 18px;
+        background: #fffdf8;
+      }
+
+      .work-card:nth-child(2n) {
+        background: #e9f1ff;
+      }
+
+      .work-card:nth-child(3n) {
+        background: #fff0d2;
+      }
+
+      .work-card:nth-child(4n) {
+        background: #e6f3e8;
+      }
+
+      .work-card h3 {
+        margin: 0;
+        font-size: clamp(24px, 2.6vw, 42px);
+        line-height: 1;
+      }
+
+      .work-card p {
+        margin: 14px 0 0;
+        color: #403a35;
+        line-height: 1.5;
+      }
+
+      .card-bottom {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        margin-top: 30px;
+        border-top: 1px solid var(--line);
+        padding-top: 14px;
+        font-size: 13px;
+        font-weight: 800;
+      }
+
+      .dot-row {
+        display: flex;
+        gap: 7px;
+      }
+
+      .dot {
+        width: 13px;
+        height: 13px;
+        border: 1px solid var(--ink);
+        border-radius: 50%;
+        background: var(--red);
+      }
+
+      .dot:nth-child(2) {
+        background: var(--yellow);
+      }
+
+      .dot:nth-child(3) {
+        background: var(--blue);
+      }
+
+      .archive {
+        min-height: auto;
+        padding-bottom: 72px;
+      }
+
+      .archive-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .archive-link {
+        min-height: 86px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        border: 1px solid var(--line);
+        padding: 16px;
+        background: rgba(255, 255, 255, 0.52);
+        font-weight: 800;
+      }
+
+      .archive-link span {
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      @media (max-width: 980px) {
+        .hero,
+        .section-head {
+          grid-template-columns: 1fr;
+        }
+
+        .stage {
+          min-height: 420px;
+        }
+
+        .feature-grid,
+        .archive-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      @media (max-width: 640px) {
+        .frame {
+          min-height: auto;
+          padding: 22px 16px 40px;
+        }
+
+        .topbar {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+
+        nav {
+          justify-content: flex-start;
+        }
+
+        h1,
+        h2 {
+          font-size: clamp(42px, 16vw, 72px);
+        }
+
+        .lead {
+          font-size: 16px;
+        }
+
+        .stage {
+          min-height: 340px;
+        }
+
+        .feature-grid,
+        .archive-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .work-card {
+          min-height: 240px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <section class="frame" id="figma-1" aria-label='MacBook Pro 16" - 1'>
+        <header class="topbar">
+          <a class="brand" href="#figma-1" aria-label="홈으로 이동">
+            <span class="brand-mark" aria-hidden="true"></span>
+            Interactive Computing
+          </a>
+          <nav aria-label="페이지 이동">
+            <a href="#figma-1">MacBook Pro 16&quot; - 1</a>
+            <a href="#figma-2">MacBook Pro 16&quot; - 2</a>
+            <a href="#archive">Archive</a>
+          </nav>
+        </header>
+
+        <div class="hero">
+          <div>
+            <p class="eyebrow">MacBook Pro 16&quot; - 1</p>
+            <h1>정리하자</h1>
+            <p class="lead">
+              인터렉티브 컴퓨팅 수업에서 만든 스케치들을 한 곳에 모은 정적 홈페이지입니다.
+              실험의 날짜, 감정, 움직임, 이미지 조각을 빠르게 훑고 바로 실행할 수 있게 구성했습니다.
+            </p>
+            <div class="hero-actions">
+              <a class="button primary" href="#figma-2">작업 보기</a>
+              <a class="button" href="0518/index.html">0518 열기</a>
+            </div>
+          </div>
+
+          <div class="stage" aria-hidden="true">
+            <span class="shape one"></span>
+            <span class="shape two"></span>
+            <span class="shape three"></span>
+            <span class="shape four"></span>
+            <span class="frame-label">MacBook Pro 16&quot; - 1</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="frame" id="figma-2" aria-label='MacBook Pro 16" - 2'>
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">MacBook Pro 16&quot; - 2</p>
+            <h2>Sketch Index</h2>
+          </div>
+          <p>
+            p5.js로 만든 화면들을 날짜별 카드로 정리했습니다.
+            각 카드는 독립된 폴더의 기존 `index.html`로 연결됩니다.
+          </p>
+        </div>
+
+        <div class="feature-grid">
+          <a class="work-card" href="0309/index.html">
+            <div>
+              <h3>0309</h3>
+              <p>검은 배경 위에 원을 배치한 첫 번째 캔버스 실험입니다.</p>
+            </div>
+            <div class="card-bottom">
+              <span>Open sketch</span>
+              <span class="dot-row" aria-hidden="true"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>
+            </div>
+          </a>
+
+          <a class="work-card" href="0309/0316/index.html">
+            <div>
+              <h3>0316</h3>
+              <p>반복되는 타원과 사각형으로 화면의 리듬을 만든 구성입니다.</p>
+            </div>
+            <div class="card-bottom">
+              <span>Open sketch</span>
+              <span class="dot-row" aria-hidden="true"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>
+            </div>
+          </a>
+
+          <a class="work-card" href="0309/0323%20WK4/index.html">
+            <div>
+              <h3>0323 WK4</h3>
+              <p>감정 색과 큰 형태가 섞이는 추상 그래픽 작업입니다.</p>
+            </div>
+            <div class="card-bottom">
+              <span>Open sketch</span>
+              <span class="dot-row" aria-hidden="true"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>
+            </div>
+          </a>
+
+          <a class="work-card" href="0427/index.html">
+            <div>
+              <h3>0427</h3>
+              <p>이미지 조각을 마우스로 가져와 색을 입히는 인터랙션입니다.</p>
+            </div>
+            <div class="card-bottom">
+              <span>Open sketch</span>
+              <span class="dot-row" aria-hidden="true"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>
+            </div>
+          </a>
+
+          <a class="work-card" href="0631/index.html">
+            <div>
+              <h3>0631</h3>
+              <p>얼굴과 손 인식을 사용해 감정 기반 드로잉 미션을 진행합니다.</p>
+            </div>
+            <div class="card-bottom">
+              <span>Open sketch</span>
+              <span class="dot-row" aria-hidden="true"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>
+            </div>
+          </a>
+
+          <a class="work-card" href="0615/index.html">
+            <div>
+              <h3>0615</h3>
+              <p>수업 중 제작한 p5.js 스케치를 바로 실행할 수 있습니다.</p>
+            </div>
+            <div class="card-bottom">
+              <span>Open sketch</span>
+              <span class="dot-row" aria-hidden="true"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>
+            </div>
+          </a>
+        </div>
+      </section>
+
+      <section class="frame archive" id="archive" aria-label="전체 작업 목록">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Archive</p>
+            <h2>All Pages</h2>
+          </div>
+          <p>모든 폴더의 `index.html`을 빠르게 열 수 있는 전체 목록입니다.</p>
+        </div>
+
+        <div class="archive-grid">
+          <a class="archive-link" href="0309/index.html">0309 <span>open</span></a>
+          <a class="archive-link" href="0309/0316/index.html">0316 <span>open</span></a>
+          <a class="archive-link" href="0309/0323%20WK4/index.html">0323 WK4 <span>open</span></a>
+          <a class="archive-link" href="0413과제/index.html">0413 과제 <span>open</span></a>
+          <a class="archive-link" href="0420/index.html">0420 <span>open</span></a>
+          <a class="archive-link" href="0427/index.html">0427 <span>open</span></a>
+          <a class="archive-link" href="0504/index.html">0504 <span>open</span></a>
+          <a class="archive-link" href="0504/실습/index.html">0504 실습 <span>open</span></a>
+          <a class="archive-link" href="0518/index.html">0518 <span>open</span></a>
+          <a class="archive-link" href="0601/index.html">0601 <span>open</span></a>
+          <a class="archive-link" href="0608/index.html">0608 <span>open</span></a>
+          <a class="archive-link" href="0615/index.html">0615 <span>open</span></a>
+          <a class="archive-link" href="0622/index.html">0622 <span>open</span></a>
+          <a class="archive-link" href="0629/index.html">0629 <span>open</span></a>
+          <a class="archive-link" href="0630/index.html">0630 <span>open</span></a>
+          <a class="archive-link" href="0631/index.html">0631 <span>open</span></a>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
